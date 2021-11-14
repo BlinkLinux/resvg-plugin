@@ -1,3 +1,0 @@
-[submodule "rust/resvg"]
-	path = rust/resvg
-	url = https://github.com/RazrFalcon/resvg
