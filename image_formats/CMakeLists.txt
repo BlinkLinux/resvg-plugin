@@ -1,5 +1,7 @@
 
 add_library(resvg-image-formats SHARED
+    src/svg_io_handler.cpp
+    src/svg_io_handler.h
     src/svg_plugin.cpp
     src/svg_plugin.h
     )

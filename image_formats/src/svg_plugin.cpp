@@ -4,12 +4,16 @@
 
 #include "svg_plugin.h"
 
+#include "svg_io_handler.h"
+
 namespace {
 
 constexpr const char kExtSvg[] = "svg";
 constexpr const char kExtSvgz[] = "svgz";
 
 }  // namespace
+
+QT_BEGIN_NAMESPACE
 
 QStringList SvgPlugin::keys() const {
   return {kExtSvg, kExtSvgz};
@@ -32,5 +36,10 @@ QImageIOPlugin::Capabilities SvgPlugin::capabilities(QIODevice* device, const QB
 }
 
 QImageIOHandler* SvgPlugin::create(QIODevice* device, const QByteArray& format) const {
-  return nullptr;
+  auto* handler = new SvgIOHandler();
+  handler->setDevice(device);
+  handler->setFormat(format);
+  return handler;
 }
+
+QT_END_NAMESPACE
