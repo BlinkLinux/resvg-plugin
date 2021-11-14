@@ -1,0 +1,6 @@
+Name: resvg
+Home: https://github.com/RazrFalcon/resvg
+License: MPL-2.0
+Author: Yevhenii Reizner
+Version: master branch
+Desc: An SVG rendering library.
