@@ -13,11 +13,4 @@ find_package(Qt5 COMPONENTS
     REQUIRED)
 
 add_subdirectory(rust)
-
-add_executable(resvg_plugin src/main.cpp)
-target_link_libraries(resvg_plugin
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
-    )
-
+add_subdirectory(image_formats)
