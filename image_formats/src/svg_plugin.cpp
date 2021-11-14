@@ -6,13 +6,6 @@
 
 #include "svg_io_handler.h"
 
-namespace {
-
-constexpr const char kExtSvg[] = "svg";
-constexpr const char kExtSvgz[] = "svgz";
-
-}  // namespace
-
 QT_BEGIN_NAMESPACE
 
 QStringList SvgPlugin::keys() const {

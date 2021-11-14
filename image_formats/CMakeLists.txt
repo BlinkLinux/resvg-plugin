@@ -9,4 +9,6 @@ add_library(resvg-image-formats SHARED
 target_link_libraries(resvg-image-formats
     Qt5::Core
     Qt5::Gui
+
+    resvg-lib
     )
