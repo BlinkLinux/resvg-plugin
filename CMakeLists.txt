@@ -12,6 +12,8 @@ find_package(Qt5 COMPONENTS
     Widgets
     REQUIRED)
 
+add_subdirectory(rust)
+
 add_executable(resvg_plugin src/main.cpp)
 target_link_libraries(resvg_plugin
     Qt5::Core
