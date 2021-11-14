@@ -9,12 +9,23 @@ else()
 endif()
 
 set(RESVG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resvg)
-set(RESVG_LIB "${RESVG_DIR}/${RUST_TARGET_DIR}/libresvg.so")
+set(RESVG_SHARED_LIB "${RESVG_DIR}/${RUST_TARGET_DIR}/libresvg.so")
 add_custom_command(
-    OUTPUT "${RESVG_LIB}"
+    OUTPUT "${RESVG_SHARED_LIB}"
     COMMAND cargo build ${RUST_BUILD_FLAG} --workspace
     DEPENDS ${RESVG_DIR}/src/lib.rs
     ${RESVG_DIR}/c-api/lib.rs
     WORKING_DIRECTORY "${RESVG_DIR}"
 )
-add_custom_target(resvg-static-generator DEPENDS "${RESVG_LIB}")
+add_custom_target(resvg-static-generator DEPENDS "${RESVG_SHARED_LIB}")
+
+add_library(resvg-lib
+    resvg/c-api/resvg.h
+    resvg/c-api/ResvgQt.h
+    )
+add_dependencies(resvg-lib resvg-static-generator)
+target_link_libraries(resvg-lib ${RESVG_SHARED_LIB})
+target_link_libraries(resvg-lib
+    Qt5::Core
+    Qt5::Gui
+    )
