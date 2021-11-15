@@ -23,6 +23,7 @@
 #include <QFileInfo>
 #include <QGuiApplication>
 #include <QImage>
+#include <QPainter>
 #include <QRectF>
 #include <QScopedPointer>
 #include <QScreen>
@@ -374,6 +375,8 @@ public:
 
         const auto r = resvg_get_image_viewbox(d->tree);
         d->viewBox = QRectF(r.x, r.y, r.width, r.height);
+        const auto s = resvg_get_image_size(d->tree);
+        d->size = QSizeF(s.width, s.height);
 
         return true;
     }
@@ -457,6 +460,14 @@ public:
             return QRectF();
     }
 
+    QSizeF size() const {
+        if (d->tree) {
+            return d->size;
+        } else {
+            return {};
+        }
+    }
+
     /**
      * @brief Returns bounding rectangle of the item with the given \b id.
      *        The transformation matrix of parent elements is not affecting
@@ -530,6 +541,7 @@ public:
      */
     QImage renderToImage(const QSize &size = QSize()) const
     {
+        qDebug() << Q_FUNC_INFO << ", size:" << size;
         resvg_fit_to fit_to = { RESVG_FIT_TO_ORIGINAL, 1 };
         if (size.isValid()) {
             // TODO: support height too.
@@ -550,6 +562,18 @@ public:
         // std::move is required to call inplace version of rgbSwapped().
         return std::move(qImg).rgbSwapped();
     }
+
+  void render(QImage* qImg, QRectF bounds) const
+  {
+        qDebug() << Q_FUNC_INFO << " bounds:" << bounds;
+      resvg_fit_to fit_to = { RESVG_FIT_TO_ORIGINAL, 1 };
+
+      resvg_render(d->tree, fit_to, qImg->width(), qImg->height(), (char*)qImg->bits());
+
+      // resvg renders onto the RGBA canvas, while QImage is ARGB.
+      // std::move is required to call inplace version of rgbSwapped().
+      *qImg = std::move(*qImg).rgbSwapped();
+  }
 
     /**
      * @brief Initializes the library log.
