@@ -11,7 +11,7 @@
 
 QT_BEGIN_NAMESPACE
 
-SvgIOHandler::SvgIOHandler() : QImageIOHandler(), renderer(new ResvgRenderer) {
+SvgIOHandler::SvgIOHandler() : QImageIOHandler(), renderer_(new ResvgRenderer) {
 
 }
 
@@ -23,7 +23,7 @@ bool SvgIOHandler::canRead() const {
   if (!device()) {
     return false;
   }
-  if (loaded && !readDone) {
+  if (loaded_ && !read_done_) {
     return true;
   }
 
@@ -44,26 +44,26 @@ QByteArray SvgIOHandler::name() const {
 }
 
 bool SvgIOHandler::read(QImage* image) {
-  if (readDone || load(device())) {
-    bool xform = (clipRect.isValid() || scaledSize.isValid() || scaledClipRect.isValid());
-    QSize finalSize = defaultSize;
+  if (read_done_ || load(device())) {
+    bool xform = (clip_rect_.isValid() || scaled_size_.isValid() || scaled_clip_rect_.isValid());
+    QSize finalSize = default_size_;
     QRectF bounds;
-    if (xform && !defaultSize.isEmpty()) {
-      bounds = QRectF(QPointF(0, 0), QSizeF(defaultSize));
+    if (xform && !default_size_.isEmpty()) {
+      bounds = QRectF(QPointF(0, 0), QSizeF(default_size_));
       QPoint tr1, tr2;
       QSizeF sc(1, 1);
-      if (clipRect.isValid()) {
-        tr1 = -clipRect.topLeft();
-        finalSize = clipRect.size();
+      if (clip_rect_.isValid()) {
+        tr1 = -clip_rect_.topLeft();
+        finalSize = clip_rect_.size();
       }
-      if (scaledSize.isValid()) {
-        sc = QSizeF(qreal(scaledSize.width()) / finalSize.width(),
-                    qreal(scaledSize.height()) / finalSize.height());
-        finalSize = scaledSize;
+      if (scaled_size_.isValid()) {
+        sc = QSizeF(qreal(scaled_size_.width()) / finalSize.width(),
+                    qreal(scaled_size_.height()) / finalSize.height());
+        finalSize = scaled_size_;
       }
-      if (scaledClipRect.isValid()) {
-        tr2 = -scaledClipRect.topLeft();
-        finalSize = scaledClipRect.size();
+      if (scaled_clip_rect_.isValid()) {
+        tr2 = -scaled_clip_rect_.topLeft();
+        finalSize = scaled_clip_rect_.size();
       }
       QTransform t;
       t.translate(tr2.x(), tr2.y());
@@ -72,8 +72,8 @@ bool SvgIOHandler::read(QImage* image) {
       bounds = t.mapRect(bounds);
     }
     if (!finalSize.isEmpty()) {
-      if (bounds.isEmpty() && backColor.alpha() == 0) {
-        *image = renderer->renderToImage(finalSize);
+      if (bounds.isEmpty() && back_color_.alpha() == 0) {
+        *image = renderer_->renderToImage(finalSize);
       } else {
         // TODO(Shaohua):
 //        *image = QImage(finalSize, QImage::Format_ARGB32_Premultiplied);
@@ -82,10 +82,10 @@ bool SvgIOHandler::read(QImage* image) {
 //        p.setRenderHints(QPainter::SmoothPixmapTransform);
 //        renderer->render(&p, bounds);
 //        p.end();
-        *image = renderer->renderToImage(finalSize);
+        *image = renderer_->renderToImage(finalSize);
       }
     }
-    readDone = true;
+    read_done_ = true;
     return true;
   }
 
@@ -105,19 +105,19 @@ QVariant SvgIOHandler::option(QImageIOHandler::ImageOption option) const {
     }
     case Size: {
       const_cast<SvgIOHandler*>(this)->load(device());
-      return defaultSize;
+      return default_size_;
     }
     case ClipRect: {
-      return clipRect;
+      return clip_rect_;
     }
     case ScaledSize: {
-      return scaledSize;
+      return scaled_size_;
     }
     case ScaledClipRect: {
-      return scaledClipRect;
+      return scaled_clip_rect_;
     }
     case BackgroundColor: {
-      return backColor;
+      return back_color_;
     }
     default: {
       return {};
@@ -128,19 +128,19 @@ QVariant SvgIOHandler::option(QImageIOHandler::ImageOption option) const {
 void SvgIOHandler::setOption(QImageIOHandler::ImageOption option, const QVariant& value) {
   switch (option) {
     case ClipRect: {
-      clipRect = value.toRect();
+      clip_rect_ = value.toRect();
       break;
     }
     case ScaledSize: {
-      scaledSize = value.toSize();
+      scaled_size_ = value.toSize();
       break;
     }
     case ScaledClipRect: {
-      scaledClipRect = value.toRect();
+      scaled_clip_rect_ = value.toRect();
       break;
     }
     case BackgroundColor: {
-      backColor = value.value<QColor>();
+      back_color_ = value.value<QColor>();
       break;
     }
     default: {
@@ -170,7 +170,7 @@ bool SvgIOHandler::load(QIODevice* device) {
     return false;
   }
 
-  if (loaded) {
+  if (loaded_) {
     return true;
   }
   if (format().isEmpty()) {
@@ -182,20 +182,20 @@ bool SvgIOHandler::load(QIODevice* device) {
   if (buf) {
     const QByteArray& ba = buf->data();
     const QByteArray data = QByteArray::fromRawData(ba.constData() + buf->pos(), ba.size() - buf->pos());
-    res = renderer->load(data, ResvgOptions());
+    res = renderer_->load(data, ResvgOptions());
     buf->seek(ba.size());
   } else if (format() == kExtSvgz) {
-    res = renderer->load(device->readAll(), ResvgOptions());
+    res = renderer_->load(device->readAll(), ResvgOptions());
   } else {
-    res = renderer->load(device->readAll(), ResvgOptions());
+    res = renderer_->load(device->readAll(), ResvgOptions());
   }
 
   if (res) {
-    defaultSize = renderer->viewBox().size();
-    loaded = true;
+    default_size_ = renderer_->viewBox().size();
+    loaded_ = true;
   }
 
-  return loaded;
+  return loaded_;
 }
 
 QT_END_NAMESPACE

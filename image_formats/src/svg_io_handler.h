@@ -39,15 +39,15 @@ class SvgIOHandler : public QImageIOHandler {
  private:
   bool load(QIODevice* device);
 
-  QSharedPointer<ResvgRenderer> renderer;
+  QSharedPointer<ResvgRenderer> renderer_;
 
-  QSize defaultSize{};
-  QRect clipRect{};
-  QSize scaledSize{};
-  QRect scaledClipRect{};
-  bool loaded{false};
-  bool readDone{false};
-  QColor backColor{};
+  QSize default_size_{};
+  QRect clip_rect_{};
+  QSize scaled_size_{};
+  QRect scaled_clip_rect_{};
+  bool loaded_{false};
+  bool read_done_{false};
+  QColor back_color_{};
 };
 
 constexpr const char kExtSvg[] = "svg";
