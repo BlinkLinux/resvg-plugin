@@ -23,6 +23,8 @@ add_library(resvg-lib
     resvg/c-api/resvg.h
     resvg/c-api/ResvgQt.h
     )
+target_include_directories(resvg-lib
+    PUBLIC resvg/c-api)
 add_dependencies(resvg-lib resvg-static-generator)
 target_link_libraries(resvg-lib ${RESVG_SHARED_LIB})
 target_link_libraries(resvg-lib

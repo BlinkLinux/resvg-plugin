@@ -5,6 +5,7 @@
 #include "svg_io_handler.h"
 
 #include <QBuffer>
+#include <QPainter>
 
 #include "ResvgQt.h"
 
@@ -48,7 +49,7 @@ bool SvgIOHandler::read(QImage* image) {
     QSize finalSize = defaultSize;
     QRectF bounds;
     if (xform && !defaultSize.isEmpty()) {
-      bounds = QRectF(QPointF(0,0), QSizeF(defaultSize));
+      bounds = QRectF(QPointF(0, 0), QSizeF(defaultSize));
       QPoint tr1, tr2;
       QSizeF sc(1, 1);
       if (clipRect.isValid()) {
@@ -74,13 +75,14 @@ bool SvgIOHandler::read(QImage* image) {
       if (bounds.isEmpty() && backColor.alpha() == 0) {
         *image = renderer->renderToImage(finalSize);
       } else {
-        *image = QImage(finalSize, QImage::Format_ARGB32_Premultiplied);
-        image->fill(backColor.rgba());
-        QPainter p(image);
-        p.setRenderHints(QPainter::SmoothPixmapTransform);
+        // TODO(Shaohua):
+//        *image = QImage(finalSize, QImage::Format_ARGB32_Premultiplied);
+//        image->fill(backColor.rgba());
+//        QPainter p(image);
+//        p.setRenderHints(QPainter::SmoothPixmapTransform);
 //        renderer->render(&p, bounds);
-        renderer->render(&p);
-        p.end();
+//        p.end();
+        *image = renderer->renderToImage(finalSize);
       }
     }
     readDone = true;
@@ -97,7 +99,7 @@ bool SvgIOHandler::canRead(QIODevice* device) {
 }
 
 QVariant SvgIOHandler::option(QImageIOHandler::ImageOption option) const {
-  switch(option) {
+  switch (option) {
     case ImageFormat: {
       return QImage::Format_ARGB32_Premultiplied;
     }
@@ -124,7 +126,7 @@ QVariant SvgIOHandler::option(QImageIOHandler::ImageOption option) const {
 }
 
 void SvgIOHandler::setOption(QImageIOHandler::ImageOption option, const QVariant& value) {
-  switch(option) {
+  switch (option) {
     case ClipRect: {
       clipRect = value.toRect();
       break;
@@ -148,7 +150,7 @@ void SvgIOHandler::setOption(QImageIOHandler::ImageOption option, const QVariant
 }
 
 bool SvgIOHandler::supportsOption(QImageIOHandler::ImageOption option) const {
-  switch(option) {
+  switch (option) {
     case ImageFormat:  // fall through
     case Size:  // fall through
     case ClipRect:  // fall through
@@ -176,15 +178,16 @@ bool SvgIOHandler::load(QIODevice* device) {
   }
 
   bool res = false;
-  auto *buf = qobject_cast<QBuffer*>(device);
+  auto* buf = qobject_cast<QBuffer*>(device);
   if (buf) {
-    const QByteArray &ba = buf->data();
-    res = renderer->load(QByteArray::fromRawData(ba.constData() + buf->pos(), ba.size() - buf->pos()));
+    const QByteArray& ba = buf->data();
+    const QByteArray data = QByteArray::fromRawData(ba.constData() + buf->pos(), ba.size() - buf->pos());
+    res = renderer->load(data, ResvgOptions());
     buf->seek(ba.size());
   } else if (format() == kExtSvgz) {
-    res = renderer->load(device->readAll());
+    res = renderer->load(device->readAll(), ResvgOptions());
   } else {
-    res = renderer->load(device->readAll());
+    res = renderer->load(device->readAll(), ResvgOptions());
   }
 
   if (res) {
