@@ -46,7 +46,7 @@ QByteArray SvgIOHandler::name() const {
 bool SvgIOHandler::read(QImage* image) {
   if (read_done_ || load(device())) {
     bool xform = (clip_rect_.isValid() || scaled_size_.isValid() || scaled_clip_rect_.isValid());
-    QSize finalSize = default_size_;
+    QSize final_size = default_size_;
     QRectF bounds;
     if (xform && !default_size_.isEmpty()) {
       bounds = QRectF(QPointF(0, 0), QSizeF(default_size_));
@@ -54,16 +54,16 @@ bool SvgIOHandler::read(QImage* image) {
       QSizeF sc(1, 1);
       if (clip_rect_.isValid()) {
         tr1 = -clip_rect_.topLeft();
-        finalSize = clip_rect_.size();
+        final_size = clip_rect_.size();
       }
       if (scaled_size_.isValid()) {
-        sc = QSizeF(qreal(scaled_size_.width()) / finalSize.width(),
-                    qreal(scaled_size_.height()) / finalSize.height());
-        finalSize = scaled_size_;
+        sc = QSizeF(qreal(scaled_size_.width()) / final_size.width(),
+                    qreal(scaled_size_.height()) / final_size.height());
+        final_size = scaled_size_;
       }
       if (scaled_clip_rect_.isValid()) {
         tr2 = -scaled_clip_rect_.topLeft();
-        finalSize = scaled_clip_rect_.size();
+        final_size = scaled_clip_rect_.size();
       }
       QTransform t;
       t.translate(tr2.x(), tr2.y());
@@ -71,18 +71,19 @@ bool SvgIOHandler::read(QImage* image) {
       t.translate(tr1.x(), tr1.y());
       bounds = t.mapRect(bounds);
     }
-    if (!finalSize.isEmpty()) {
-      if (bounds.isEmpty() && back_color_.alpha() == 0) {
-        *image = renderer_->renderToImage(finalSize);
+
+    if (!final_size.isEmpty()) {
+      if (bounds.isEmpty() || !back_color_.isValid()) {
+        *image = renderer_->renderToImage(final_size);
       } else {
         // TODO(Shaohua):
-//        *image = QImage(finalSize, QImage::Format_ARGB32_Premultiplied);
-//        image->fill(backColor.rgba());
+//        *image = QImage(final_size, QImage::Format_ARGB32_Premultiplied);
+//        image->fill(back_color_.rgba());
 //        QPainter p(image);
 //        p.setRenderHints(QPainter::SmoothPixmapTransform);
-//        renderer->render(&p, bounds);
 //        p.end();
-        *image = renderer_->renderToImage(finalSize);
+//        renderer_->render(image, bounds);
+        *image = renderer_->renderToImage(final_size);
       }
     }
     read_done_ = true;
@@ -177,21 +178,22 @@ bool SvgIOHandler::load(QIODevice* device) {
     canRead();
   }
 
-  bool res = false;
-  auto* buf = qobject_cast<QBuffer*>(device);
+  bool ok = true;
+  QBuffer* buf = qobject_cast<QBuffer*>(device);
   if (buf) {
     const QByteArray& ba = buf->data();
     const QByteArray data = QByteArray::fromRawData(ba.constData() + buf->pos(), ba.size() - buf->pos());
-    res = renderer_->load(data, ResvgOptions());
+    ok = renderer_->load(data, ResvgOptions());
     buf->seek(ba.size());
   } else if (format() == kExtSvgz) {
-    res = renderer_->load(device->readAll(), ResvgOptions());
+    // TODO(Shaohua): Test svgz format.
+    ok = renderer_->load(device->readAll(), ResvgOptions());
   } else {
-    res = renderer_->load(device->readAll(), ResvgOptions());
+    ok = renderer_->load(device->readAll(), ResvgOptions());
   }
 
-  if (res) {
-    default_size_ = renderer_->viewBox().size();
+  if (ok) {
+    default_size_ = renderer_->size().toSize();
     loaded_ = true;
   }
 
