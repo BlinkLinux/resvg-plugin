@@ -1,6 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
   <qresource prefix="images">
     <file>logo.svg</file>
+    <file>circular-arrow-25.svg</file>
 </qresource>
 </RCC>
 

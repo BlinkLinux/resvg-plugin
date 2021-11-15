@@ -3,15 +3,24 @@
 // that can be found in the LICENSE file.
 
 #include <QApplication>
-
+#include <QDebug>
+#include <QDir>
 #include <QLabel>
+#include <QLibraryInfo>
 
 int main(int argc, char* argv[]) {
   QApplication application(argc, argv);
 
+  // Install libresvg.so into $APP/plugins/imageformats/
+  QDir app_dir = QCoreApplication::applicationDirPath();
+  const QString plugin_path = app_dir.absoluteFilePath("plugins");
+  QCoreApplication::addLibraryPath(plugin_path);
+
   QLabel label;
   label.resize(640, 480);
-  QPixmap pixmap(":/images/logo.svg");
+  QPixmap pixmap(":/images/circular-arrow-25.svg");
+//  QPixmap pixmap(":/images/logo.svg");
+  qDebug() << "pixmap size:" << pixmap.size();
   label.setPixmap(pixmap);
   label.show();
 
