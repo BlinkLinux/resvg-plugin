@@ -12,7 +12,7 @@
 int main(int argc, char* argv[]) {
   QApplication application(argc, argv);
 
-  // Install libresvg.so into $APP/plugins/imageformats/
+  // Install librusty_resvg.so into $APP/plugins/imageformats/
   QDir app_dir = QCoreApplication::applicationDirPath();
   const QString plugin_path = app_dir.absoluteFilePath("plugins");
   QCoreApplication::addLibraryPath(plugin_path);
