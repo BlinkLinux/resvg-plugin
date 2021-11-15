@@ -73,17 +73,13 @@ bool SvgIOHandler::read(QImage* image) {
     }
 
     if (!final_size.isEmpty()) {
-      if (bounds.isEmpty() || !back_color_.isValid()) {
+      // TODO(Shaohua): Set bounds
+      if (!back_color_.isValid()) {
         *image = renderer_->renderToImage(final_size);
       } else {
-        // TODO(Shaohua):
-//        *image = QImage(final_size, QImage::Format_ARGB32_Premultiplied);
-//        image->fill(back_color_.rgba());
-//        QPainter p(image);
-//        p.setRenderHints(QPainter::SmoothPixmapTransform);
-//        p.end();
-//        renderer_->render(image, bounds);
-        *image = renderer_->renderToImage(final_size);
+        *image = QImage(final_size, QImage::Format_ARGB32_Premultiplied);
+        image->fill(back_color_.rgba());
+        renderer_->render(image);
       }
     }
     read_done_ = true;

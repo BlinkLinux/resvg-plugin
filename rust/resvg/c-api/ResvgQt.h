@@ -541,7 +541,6 @@ public:
      */
     QImage renderToImage(const QSize &size = QSize()) const
     {
-        qDebug() << Q_FUNC_INFO << ", size:" << size;
         resvg_fit_to fit_to = { RESVG_FIT_TO_ORIGINAL, 1 };
         if (size.isValid()) {
             // TODO: support height too.
@@ -563,13 +562,10 @@ public:
         return std::move(qImg).rgbSwapped();
     }
 
-  void render(QImage* qImg, QRectF bounds) const
+  void render(QImage* qImg) const
   {
-        qDebug() << Q_FUNC_INFO << " bounds:" << bounds;
       resvg_fit_to fit_to = { RESVG_FIT_TO_ORIGINAL, 1 };
-
       resvg_render(d->tree, fit_to, qImg->width(), qImg->height(), (char*)qImg->bits());
-
       // resvg renders onto the RGBA canvas, while QImage is ARGB.
       // std::move is required to call inplace version of rgbSwapped().
       *qImg = std::move(*qImg).rgbSwapped();
