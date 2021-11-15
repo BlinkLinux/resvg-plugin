@@ -15,3 +15,4 @@ find_package(Qt5 COMPONENTS
 
 add_subdirectory(rust)
 add_subdirectory(image_formats)
+add_subdirectory(tests)
