@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(resvg_plugin VERSION 0.1.1)
+project(resvg_plugin VERSION 0.1.2)
 
 # Only generate Debug and Release configuration types.
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
