@@ -14,5 +14,5 @@ find_package(Qt5 COMPONENTS
     REQUIRED)
 
 add_subdirectory(rust)
-add_subdirectory(image_formats)
+add_subdirectory(imageformats)
 add_subdirectory(tests)

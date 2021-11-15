@@ -11,11 +11,12 @@ qt_wrap_cpp(SOURCES
 add_library(resvg-image-formats SHARED
     ${SOURCES}
     )
-message(STATUS "SOURCES: ${SOURCES}")
-
 target_link_libraries(resvg-image-formats
     Qt5::Core
     Qt5::Gui
 
     resvg-lib
+    )
+set_target_properties(resvg-image-formats
+    PROPERTIES OUTPUT_NAME rusty_resvg
     )
